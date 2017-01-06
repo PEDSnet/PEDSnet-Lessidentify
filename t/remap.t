@@ -48,6 +48,14 @@ foreach my $pair ( [ qw/ remap_id person_id / ],
       "$method maps same source to same substitute");
 }
 
+isnt(scalar $less->remap_date({ person_id => 1,
+				 testme => '2014-01-15 12:34:56' }, 'testme'),
+     scalar $less->remap_date({ person_id => 1,
+				testme => '2014-01-15 12:34:56' }, 'testme',
+			      { person_id => 2 }),
+     'remap_date respects person ID override');
+
+
 like(scalar $less->remap_date({ person_id => 1,
 				 testme => '2014-01-15 12:34:56' }, 'testme'),
      qr/^\d{4}-\d{2}-\d{2}$/, 'remap_date truncates to date');
