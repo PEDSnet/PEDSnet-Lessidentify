@@ -512,6 +512,19 @@ them.
 
 =back
 
+You also have the option of overriding builders for public attributes,
+just like any other method, should you want to influence configuration
+defaults that way.  These include:
+
+=over 4
+
+=item build_redact_attributes
+
+=item build_preserve_attributes
+
+=item build_force_mappings
+
+=back
 =head2 EXPORT
 
 None.
