@@ -342,7 +342,7 @@ time portion of an offset by knowing that the input value was really a
 date.  The tradeoff is that input values that were true datetimes but
 happened to occur exactly at midnight will have a different offset
 than values that occurred at non-midnight times.  If that's a problem,
-use L<remap_datetime_always>.
+use L</remap_datetime_always>.
 
 =cut
 
