@@ -93,18 +93,20 @@ The values of the C<site> attribute are remapped as labels.
 sub _build__default_mappings {
   my $self = shift;
   my $start = $self->SUPER::_build__default_mappings // {};
-  
-  {
+
+  return {
+    %$start,
     remap_id => [ qr/(?<!_concept)_id$/i ],
     remap_date => [ qr/_date$/i ],
     remap_datetime => [ qr/^time_of_birth$|_time$/i ],
     remap_label => [ 'site' ],
     redact_value => [ qr/_source_value$/i ],
-    %$start
   };
 }
 
-1;
+no warnings 'void';
+'The kids are alright';
+
 
 __END__
 
