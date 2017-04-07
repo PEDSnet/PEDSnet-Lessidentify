@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify::PEDSnet_CDM;
 
-our($VERSION) = '0.01';
+our($VERSION) = '1.00';
 
 use Moo 2;
 
@@ -48,6 +48,15 @@ tracking person-specific remappings.
 =cut
 
 sub build_person_id_key { 'person_id'; }
+
+=item *
+
+The C<time_of_birth> attribute of a record is used as the datetime of
+birth. 
+
+=cut
+
+sub build_birth_datetime_key { 'time_of_birth' }
 
 =item *
 
@@ -118,7 +127,7 @@ Are there, for certain, but have yet to be cataloged.
 
 =head1 VERSION
 
-version 0.01
+version 1.00
 
 =head1 AUTHOR
 
