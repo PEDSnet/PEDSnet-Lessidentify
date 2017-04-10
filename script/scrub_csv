@@ -1,0 +1,422 @@
+#!/usr/bin/env perl
+
+use 5.024;
+use strict;
+use warnings;
+
+package PEDSnet::Lessidentify::App::scrub_csv;
+
+our($VERSION) = '1.00';
+
+=head1 NAME
+
+scrub_csv - Reduce reidentification risk of records in CSV files
+
+=head1 SYNOPSIS
+
+  # Filter STDIN to STDOUT
+  scrub_csv --cdm_type=PEDSnet
+
+  # Scrub a set of files using existing mapping data
+  scrub_csv --cdm_type=PCORnet --output_tag=_less \
+            --load_maps_from=scrub_state.json \
+            --save_maps_to=scrub_state.json \
+            *.csv
+
+  # A la carte (no CDM) via config file
+  echo 'person_id_key = userid' >scrub_csv.conf
+  echo 'birth_datetime_key = dob' >scrub_csv.conf
+  echo 'redact = private,stuff' >>scrub_csv.conf
+  echo 'preserve = public,things' >>scrub_csv.conf
+  echo 'save_maps_to = myproject.json' >>scrub_csv.conf
+  echo 'load_maps_from = myproject.json' >>scrub_csv.conf
+  scrub_csv first.csv first_scrubbed.csv second.csv second_scrubbed.csv
+
+=head1 DESCRIPTION
+
+Scrub data in one or more CSV files using L<PEDSnet::Lessidentify>.
+
+Input files are named on the command line, and all files are scrubbed
+using the same mapping data, so changes will be consistent across
+files. If no files are named, data are read from C<STDIN>.
+
+There are several ways you can specify where output is directed.  By
+default, L<scrub_csv> treats command line arguments as pairs, with the
+first being the input and the second the ouput path names.  If you
+prefer to list only input files on the command line (handy for
+globbing), you may use the L</output_tag> option to have the output
+file names generated from the input file names instead.
+Alternatively, you can direct all output to a single file using the
+L</output_file> option.  (Be sure all of the input files have the same
+structure, if there's more than one.)  Finally, if no output file name
+or option is present, output is sent to C<STDOUT>.
+
+In addition to directing output, command line options are used to
+configure the less-identification process.  These options may be
+specified on the command line or in a L<Config::Any>-compatible
+configuration file with the stem F</path/to/scrub_csv>. For additional
+details about their behavior, see the documentation for
+L<PEDSnet::Lessidentify> or whatever subclass you're using.
+
+=head2 OPTIONS
+
+=over 4
+
+=cut
+
+use Carp qw/croak/;
+
+use Path::Tiny;
+use Text::CSV;
+
+use PEDSnet::Lessidentify;
+
+use Moo 2;
+use MooX::Options
+  protect_argv => 0,
+  with_config_from_file => 1,
+  usage_string => 'Usage: %c %o - scrub contents of CSV file(s)';
+
+use Types::Standard qw/ Str Int ArrayRef InstanceOf /;
+
+=item person_id_key=I<attr_name>
+
+Specifies that the attribute named I<attr_name> contains a unique
+person ID in the data.  This is used to maintain consistent
+person-specific mappings, so you'll likely want to provide this in
+most cases.
+
+=cut
+
+option 'person_id_key' =>
+  (isa => Str, , is => 'ro', format => 's', required => 0,
+   doc => 'name of attribute containing person ID');
+
+=item birth_datetime_key=I<attr_name>
+
+Specifies that the attribute named I<attr_name> contains a the date
+(and possibly time) of birth for a person.  This is used when
+computing ages, so you'll likely want to provide this if you're
+transforming dates to ages.
+
+=cut
+
+option 'birth_datetime_key' =>
+  (isa => Str, , is => 'ro', format => 's', required => 0,
+   doc => 'name of attribute containing date of birth');
+
+=item cdm_type=I<class>
+
+Specifies a CDM-specific subclass of L<PEDSnet::Lessidentify> to use
+as the base for scrubbing.  The C<_CDM> suffix is added if it's not
+present on I<class>.
+
+=cut
+
+option 'cdm_type' =>
+  (isa => Str, , is => 'ro', format => 's', required => 0,
+   doc => 'use a CDM-specific subclass for the scrubber');
+
+=item redact=I<attr_spec,attr_spec>
+
+Specifies as a comma-separated list the names of attributes to be
+redacted from the data during scrubbing.  You may also include this
+option multiple times to build up a larger list of redacted
+attributes. 
+
+=cut
+
+option 'redact' =>
+  (isa => ArrayRef[Str], default => sub { [] }, is => 'ro',
+   format => 's@', autosplit => ',', required => 0,
+   doc => 'attributes to redact (names or qr// expressions)');
+
+=item preserve=I<attr_spec,attr_spec>
+
+Specifies as a comma-separated list the names of attributes to be
+preserved unchanged from the data during scrubbing.  You may also
+include this option multiple times to build up a larger list of
+preserved attributes.
+
+=cut
+
+option 'preserve' =>
+  (isa => ArrayRef[Str], default => sub { [] }, is => 'ro',
+   format => 's@', autosplit => ',', required => 0,
+   doc => 'attributes to preserve (names or qr// expressions)');
+
+=item force=I<method>=I<attr_spec>
+
+Specifies a set of mappings for the
+L<PEDSnet::Lessidentify/force_mappings> attribute.  The syntax is a
+little more complex than L</redact> and L</preserve> to accomodate the
+needed semantics.  Specifically, the option value is split on the
+first C<=>, with the left side taken as the name of a mapping method,
+and the right taken as attribute specifications (split on commas).
+
+You may include this option multiple times to build up a larger list
+of mapping directives; multiple values for a given I<method> are
+merged.
+
+=cut
+
+option 'force' =>
+  (isa => ArrayRef[Str], default => sub { [] }, is => 'ro',
+   format => 's@', required => 0,
+   doc => 'mappings to force (as key-value pairs)');
+
+=item output_file=I<path>
+
+Direct scrubbed results from all input files to I<path>.  A header row
+with attribute names is output for each input file.
+
+This probably does what you want if you have a single input file or
+stream, and probably doesn't if you have more than one input file.
+
+=cut
+
+option 'output_file' =>
+  (isa => Str, is => 'ro',
+   format => 's', required => 0,
+   doc => 'file name for all scrubbed output (ignores output_tag)');
+
+=item output_tag=I<tag>
+
+Insert I<tag> just before the final C<.> in each input file path to
+procude the name of the corresponding output path.  If the input path
+doesn't contain a C<.>, I<tag> is simply appended to it.  This allows
+you to process several input files into output files with names
+similar to the corresponding inputs.
+
+=cut
+
+option 'output_tag' =>
+  (isa => Str, is => 'ro',
+   format => 's', required => 0,
+   doc => 'file name tag (before ".") for scrubbed files');
+
+=item save_maps_to=I<path>
+
+After scrubbing of data is completed, save crosswalks to I<path>, so
+it can be used in the future on additional input.  Crosswalk data is
+saved as JSON, in the hope that it is both a relatively human-readable
+and widely machine-readable format.  That said, the structure reflects
+the internal structure of the scrubber object, which is not considered
+part of the API.  Therefore, the only guarantee is that the crosswalks
+will be loadable by a scrubber of the same class that wrote them;
+there is no promise of compatibility over time or even between
+subclasses of L<PEDSnet::Lessidentify>.
+
+=cut
+
+option 'save_maps_to' =>
+  (isa => Str, is => 'ro',
+   format => 's', required => 0,
+   doc => 'save mapping state to file when done');
+
+=item load_maps_from=I<path>
+
+Before beginning to scrub input, load crosswalk data from I<path>,
+which must have been generated by use of L</save_maps_to> on a prior
+run, or another process compatible with
+L<PEDSnet::Lessidentify/save_maps>. 
+
+=cut
+
+option 'load_maps_from' =>
+  (isa => Str, is => 'ro',
+   format => 's', required => 0,
+   doc => 'load mapping state from file before starting');
+
+=item verbose=I<n>
+
+Output progress messages, at increasing levels of detail as I<n>
+increases.  A value of C<1> is typically suitable for tracking routine
+progress, and higher values for debugging.
+
+=cut
+
+option 'verbose' =>
+  (isa => Int, is => 'ro', format => 'i', required => 0,
+  doc => 'output progress/debugging messages');
+
+has '_scrubber' =>
+  (isa => InstanceOf['PEDSnet::Lessidentify'], is => 'ro', init_arg => undef,
+   lazy => 1, builder => '_build__scrubber');
+
+sub _eval_options {
+  my $opts = shift;
+  my @compiled;
+
+  foreach my $val ( $opts->@*) {
+    my $op = $val;
+    $op = "'$op'" if $op =~ /^\w+$/;
+    $op = eval "$op" //
+      croak "Error compiling spec $op: $@";
+    push @compiled, $op;
+  }
+  \@compiled;
+}
+
+sub _build__scrubber {
+  my $self = shift;
+  my $class = 'PEDSnet::Lessidentify';
+  my %params;
+
+  if ($self->cdm_type) {
+    $class .= '::' . $self->cdm_type;
+    $class .= '_CDM' unless $class =~ /_CDM$/;
+    require Module::Runtime;
+    Module::Runtime::require_module($class);
+  }
+
+  $params{redact_attributes} = _eval_options($self->redact) if $self->redact->@*;
+  $params{preserve_attributes} = _eval_options($self->preserve) if $self->preserve->@*;
+  $params{person_id_key} = $self->person_id_key if $self->person_id_key;
+  if ($self->force) {
+    my %fm;
+    foreach my $val ($self->force->@*) {
+      my($meth, $spec) = split /=/, $val, 2;
+      $fm{$meth} //= [];
+      push $fm{$meth}->@*, _eval_options( [ split /,/, $spec ] );
+    }
+    $params{force_mappings} = \%fm;
+  }
+  
+  $class->new(\%params);
+}
+
+=back
+
+=head1 USE AS A MODULE
+
+While this tool is intended primarily as a stand-alone application, it
+is possible to load it as part of a larger program via a mechanism
+such as L<perlfunc/require>.  If you do so, rather than executing
+immediately, two methods are provided in the package
+L<PEDSnet::Lessidentify::App::scrub_csv|scrub_csv>:
+
+=over 4
+
+=item scrub_csv($in, $out)
+
+Read CSV data from I<$in> and write the scrubbed result to I<$out>.
+Both I<$in> and I<$out> can be path names or file handles.  The rist
+record of I<$in> must be a header that provides attribute names.
+
+Returns a true value if successful, and a false value otherwise.
+Errors in reading or writing CSV data produce immediate warnings.
+
+=cut
+
+sub scrub_csv {
+  my($self, $in, $out) = @_;
+  my $incsv = Text::CSV->new({ binary => 1, auto_diag => 1 });
+  my($infh, $outfh, $cols, $outcsv);
+
+  if (ref $in)  { $infh = $in }
+  else          { $infh = path($in)->openr;   }
+  if (ref $out) { $outfh = $out }
+  else          { $outfh = path($out)->openw; }
+
+  $cols = $incsv->getline($infh);
+  $incsv->column_names($cols);
+  $outcsv = Text::CSV->new({ eol => "\n", sep => $incsv->sep,
+			     auto_diag => 1, binary => 1 });
+  $outcsv->print($outfh, $cols);
+  
+  while (my $r = $incsv->getline_hr($infh)) {
+    my $new = $self->_scrubber->scrub_record($r);
+    $outcsv->print($outfh, [ @{$new}{@$cols} ])
+      if grep { defined } @{$new}{@$cols};
+  }
+  
+  $infh->close || croak("Error reading $in: $!") unless ref $in;
+  $outfh->close || croak("Error writing $out: $!") unless ref $out;
+  return !($incsv->error_diag !~ /^EOF/ or $outcsv->error_diag);
+}
+
+=item run(I<$files>)
+
+When called on an object constructed via
+L<MooX::Options/new_with_options>, scrub the files pointed to by the
+array reference I<$files>.  If I<$files> is absent, uses C<@ARGV> as a
+source of files.
+
+=cut
+
+sub run {
+  my($app, $files) = @_;
+  my $tag = $app->output_tag;
+  my $done = 0;
+  my $outfh;
+  $outfh = path($app->output_file)->openw if $app->output_file;
+  $files //= \@ARGV;
+
+  $app->_scrubber->load_maps( $app->load_maps_from )
+    if $app->load_maps_from;
+
+  if (@$files) {
+    while (@$files) {
+      my $f = shift @$files;
+      my $scrubbed;
+      
+      if ($outfh) { $scrubbed = $outfh }
+      elsif ($tag) {
+	$scrubbed = $f =~ s/(\.[^.]*)$/$tag$1/r;
+	$scrubbed .= "_$tag" if $f eq $scrubbed; # No dot
+      }
+      else {
+	$scrubbed = shift(@$files) || \*STDOUT;
+      }
+      print "Converting $f to $scrubbed\n";
+      $done++ if $app->scrub_csv($f, $scrubbed);
+    }
+  }
+  else {
+    $done++ if $app->scrub_csv(\*STDIN,
+			       $outfh ||
+			       ( $tag ? $tag : \*STDOUT));
+  }
+
+  $app->_scrubber->save_maps( $app->save_maps_to )
+    if $app->save_maps_to;
+
+  $done;
+}
+
+
+exit( ! PEDSnet::Lessidentify::App::scrub_csv->new_with_options->run )
+  unless (caller);
+
+no warnings 'void';
+'Make it so!';
+
+__END__
+
+=back
+
+=head1 BUGS AND CAVEATS
+
+Are there, for certain, but have yet to be cataloged.
+
+=head1 VERSION
+
+version 1.00
+
+=head1 AUTHOR
+
+Charles Bailey <cbail@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2017 by Charles Bailey
+
+This software may be used under the terms of the Artistic License or
+the GNU General Public License, as the user prefers.
+
+This code was written at the Children's Hospital of Philadelphia as
+part of L<PCORI|http://www.pcori.org>-funded work in the
+L<PEDSnet|http://www.pedsnet.org> Data Coordinating Center.
+
+=cut
