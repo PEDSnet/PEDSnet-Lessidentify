@@ -6,6 +6,11 @@
 
 For more information on what's in the box, see the [SYNOPSIS.md](SYNOPSIS.md) file in the repository, or `perldoc PEDSnet::Lessidentify` after installing the module.
 
+
+### Rules of the Road
+
+We are strong believers in open, collaborative science, and we've made PEDSnet::Lessidentify available as open-source software in that mindset.  Knowing that people get very anxious about tools that may affect privacy risk (appropriately so - this is important stuff), we also wanted to point anyone with questions to the terms of use.  These are detailed in the [LICENSE](LICENSE) file that accompanies the distribution, which in a nutshell presents the GPL and Artistic licenses.  Of particular note, both licenses contain disclaimers of warranty and liability following standard open-source practice.  Caveat utor.
+
 ### Installing PEDSnet::Lessidentify
 
 Fundamentally, PEDSnet::Lessidentify is installed like any other Perl module.  If you're not already familiar with Perl module management, you may find one of these options useful.
