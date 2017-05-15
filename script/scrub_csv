@@ -52,11 +52,12 @@ structure, if there's more than one.)  Finally, if no output file name
 or option is present, output is sent to C<STDOUT>.
 
 In addition to directing output, command line options are used to
-configure the less-identification process.  These options may be
-specified on the command line or in a L<Config::Any>-compatible
-configuration file with the stem F</path/to/scrub_csv>. For additional
-details about their behavior, see the documentation for
-L<PEDSnet::Lessidentify> or whatever subclass you're using.
+configure the most common settings for the less-identification
+process.  These options may be specified on the command line or in a
+L<Config::Any>-compatible configuration file with the stem
+F</path/to/scrub_csv>. For additional details about their behavior,
+see the documentation for L<PEDSnet::Lessidentify> or whatever
+subclass you're using.
 
 =head2 OPTIONS
 
@@ -164,6 +165,50 @@ option 'force' =>
   (isa => ArrayRef[Str], default => sub { [] }, is => 'ro',
    format => 's@', required => 0,
    doc => 'mappings to force (as key-value pairs)');
+
+=item window_days=I<n>
+
+Width of the window within which dates/times will be shifted.
+
+Defaults to 366.
+
+=cut
+
+option 'window_days' =>
+  ( isa => Int, default => sub { 366 }, is => 'ro',
+    format => 'i', required => 0,
+    doc => 'number of days for date shift window' );
+
+=item min_date=I<date>
+
+The minimum date that will not trigger the L</date_bounds_action>.
+
+=cut
+
+option 'min_date' =>
+  ( isa => Str, is => 'ro', required => 0, format => 's',
+    doc => 'minimum date threshold' );
+
+=item max_date=I<date>
+
+The maximum date that will not trigger the L</date_bounds_action>.
+
+=cut
+
+option 'max_date' =>
+  ( isa => Str, is => 'ro', required => 0, format => 's',
+    doc => 'maximum date threshold' );
+
+=item date_threshold_action=I<action>
+
+Action to take if a date falls outside L</min_date> or L</max_date>.
+Options include C<none>, C<warn>, and C<retry>.
+
+=cut
+
+option 'date_threshold_action' =>
+  ( isa => Str, is => 'ro', required => 0, format => 's',
+    doc => 'out-of-bounds date action (none|warn|retry)' );
 
 =item output_file=I<path>
 
