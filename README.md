@@ -37,7 +37,7 @@ If you don't have a current version of Perl, or would like to avoid messing with
 curl -L https://install.perlbrew.pl | bash
 perlbrew init
 # Build a new perl version; see perlbrew available for options
-perlbrew install perl-5.24.1
+perlbrew install perl-stable
 perlbrew install-cpanm
 # Install PEDSnet::Lessidentify
 cpanm PEDSnet::Lessidentify
@@ -49,5 +49,4 @@ If building from source isn't an option for you, visit http://www.perl.org/get.h
 
 #### Docker Container
 
-Finally, if you want to avoid the overhead of building Perl, or prefer to keep PEDSnet::Lessidentify separated, you can use this [Dockerfile](etc/Dockerfile) or one like it build a Docker image that includes PEDSnet::Lessidentify. 
-
+Finally, if you want to avoid the overhead of building Perl, or prefer to keep PEDSnet::Lessidentify separated, you can use this [Dockerfile](etc/Dockerfile) or one like it build a Docker image that includes PEDSnet::Lessidentify.
