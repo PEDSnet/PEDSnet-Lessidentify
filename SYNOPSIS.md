@@ -200,15 +200,40 @@ related to any individual, so that intervals are preserved.
     someone can reverse engineer the original date by comparing all the
     alternatives to any external information they may have.  Caveat utor.
 
-- warn\_before\_date
-- warn\_after\_date
+- before\_date\_threshold
+- after\_date\_threshold
 
     Emit a warning message if a date(time) in the input is shifted to a
-    point earlier than [warn\_before\_date](https://metacpan.org/pod/warn_before_date) or later than
-    [warn\_after\_date](https://metacpan.org/pod/warn_after_date).
+    point earlier than [before\_date\_threshold](https://metacpan.org/pod/before_date_threshold) or later than
+    [after\_date\_threshold](https://metacpan.org/pod/after_date_threshold).
 
     There is no default; if you want boundary warnings, you need to say
     so. 
+
+- date\_threshold\_action
+
+    Determines what to do if a date is encountered outside the range
+    between ["before\_date\_threshold"](#before_date_threshold) and ["after\_date\_threshold"](#after_date_threshold).  Three
+    options are available:
+
+    - none
+
+        Do nothing.  It's as if the thresholds weren't set.
+
+    - warn
+
+        Emit a warning.
+
+    - retry
+
+        This is a little bit complicated.  If the out-of-threshold date is
+        encountered on the **first** attempt to shift a date for that person,
+        the offset is recomputed to place the shifted date between the
+        thresholds.  If it is encountered on a **subsequent** attempt to shift
+        a date, behaves like `warn`, since presumably in-threshold shifted
+        dates for that person already exist.
+
+        Defaults to [retry](https://metacpan.org/pod/retry).
 
 - datetime\_to\_age
 

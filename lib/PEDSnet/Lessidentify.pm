@@ -349,32 +349,72 @@ has 'datetime_window_days' =>
 
 sub build_datetime_window_days { 366 }
 
-=item warn_before_date
+=item before_date_threshold
 
-=item warn_after_date
+=item after_date_threshold
 
 Emit a warning message if a date(time) in the input is shifted to a
-point earlier than L<warn_before_date> or later than
-L<warn_after_date>.
+point earlier than L<before_date_threshold> or later than
+L<after_date_threshold>.
 
 There is no default; if you want boundary warnings, you need to say
 so. 
 
 =cut
 
-has 'warn_before_date' =>
+has 'before_date_threshold' =>
   ( isa => Maybe[InstanceOf['DateTime']], is => 'rwp', required => 0, lazy => 1,
     coerce => sub { ref $_[0] ? $_[0] : parse_date($_[0]) },
-    builder => 'build_warn_before_date' );
+    builder => 'build_before_date_threshold' );
 
-sub build_warn_before_date {}
+sub build_before_date_threshold {}
 
-has 'warn_after_date' =>
+has 'after_date_threshold' =>
   ( isa => Maybe[InstanceOf['DateTime']], is => 'rwp', required => 0, lazy => 1,
     coerce => sub { ref $_[0] ? $_[0] : parse_date($_[0]) },
-    builder => 'build_warn_after_date' );
+    builder => 'build_after_date_threshold' );
 
-sub build_warn_after_date {}
+sub build_after_date_threshold {}
+
+=item date_threshold_action
+
+Determines what to do if a date is encountered outside the range
+between L</before_date_threshold> and L</after_date_threshold>.  Three
+options are available:
+
+=over 4
+
+=item none
+
+Do nothing.  It's as if the thresholds weren't set.
+
+=item warn
+
+Emit a warning.
+
+=item retry
+
+This is a little bit complicated.  If the out-of-threshold date is
+encountered on the B<first> attempt to shift a date for that person,
+the offset is recomputed to place the shifted date between the
+thresholds.  To avoid hanging on pathologic dates, it will only retry
+a limited number of times before giving up with a warning.
+
+If it is encountered on a B<subsequent> attempt to shift a date,
+behaves like C<warn>, since presumably in-threshold shifted dates for
+that person already exist.
+
+Defaults to L<retry>.
+
+=back
+
+=cut
+
+has 'date_threshold_action' =>
+  ( isa => Maybe[Enum[qw/ none warn retry / ]], is => 'rwp', lazy => 1,
+    builder => 'build_date_threshold_action' );
+
+sub build_date_threshold_action { 'retry' }
 
 =item datetime_to_age
 
@@ -398,7 +438,7 @@ person.
 =cut
 
 has 'datetime_to_age' =>
-  ( isa => Maybe[Enum[ qw/ days months years/ ]], is => 'rwp', lazy => 1,
+  ( isa => Maybe[Enum[ qw/ days months years / ]], is => 'rwp', lazy => 1,
     builder => 'build_datetime_to_age' );
 
 sub build_datetime_to_age { undef }
@@ -633,15 +673,37 @@ sub _do_remap_datetime {
   my $pid = $opts->{person_id} // $rec->{ $self->person_id_key };
   my $orig = $rec->{$key};
   my $map = $self->_datetime_map;
-  my($min,$max) = ($self->warn_before_date, $self->warn_after_date);
+  my($min, $max, $action) = ($self->before_date_threshold, $self->after_date_threshold,
+			    $self->date_threshold_action);
   my $new;
+  
+  if (not $action or $action eq 'none') { undef $min; undef $max }
   
   return unless defined $pid and defined $orig and length $orig;
   $orig = parse_date($orig) unless ref $orig;
   croak "Date parsing failure for $pid: $rec->{$key}"
     unless $orig;
   
-  $self->_new_time_offset($pid) unless exists $map->{$pid};
+  unless (exists $map->{$pid}) {
+    $self->_new_time_offset($pid);
+
+    if (($min || $max) && $action eq 'retry') {
+      my $i = 0;
+
+      for ( ; $i++ < 100; $self->_new_time_offset($pid)) {
+	my $test = $orig + $map->{$pid};
+	next if $min and $test < $min;
+	next if $max and $test > $max;
+	last;
+      }
+
+      if ($i > 100) {
+	$self->logger->critical("Can't get offset within date threshold for $pid " .
+				"(starting from $orig with bounds of [" .
+				($min ? $min : 'undef') . ($max ? $max : 'undef') .'])');
+      }
+    }
+  }
 
   $new = $orig + $map->{$pid};
 
@@ -656,9 +718,9 @@ sub _do_remap_datetime {
     $self->remark("Date(time) $orig mapped to $new $offset for person $pid\n");
   }
 
-  $self->warn("Early date warning: remapped $orig to $new for person $pid")
+  $self->logger->warn("Early date warning: remapped $orig to $new for person $pid")
     if $min and $new < $min;
-  $self->warn("Late date warning: remapped $orig to $new for person $pid")
+  $self->logger->warn("Late date warning: remapped $orig to $new for person $pid")
     if $max and $new > $max;
 
   if ($flags->{date_only}) {
@@ -817,8 +879,9 @@ sub save_maps {
 		    datetime_map => { map { $_ => { $dtm->{$_}->deltas } }
 				      keys %$dtm },
 		    datetime_window_days => $self->datetime_window_days,
-		    warn_before_date => $self->warn_before_date,
-		    warn_after_date => $self->warn_before_date,
+		    before_date_threshold => $self->before_date_threshold,
+		    after_date_threshold => $self->after_date_threshold,
+		    date_threshold_action => $self->date_threshold_action,
 		    datetime_to_age => $self->datetime_to_age,
 		    birth_datetime_key => $self->birth_datetime_key,
 		  });
@@ -890,8 +953,9 @@ sub load_maps {
   $self->_set__datetime_map($dtm);
   $self->_set_datetime_window_days($state->{datetime_window_days});
   $self->_set_datetime_to_age($state->{datetime_to_age});
-  $self->_set_warn_before_date($state->{warn_before_date});
-  $self->_set_warn_after_date($state->{warn_after_date});
+  $self->_set_before_date_threshold($state->{before_date_threshold});
+  $self->_set_after_date_threshold($state->{after_date_threshold});
+  $self->_set_date_threshold_action($state->{date_threshold_action});
   $self->_set_birth_datetime_key($state->{birth_datetime_key});
 
   $self;
