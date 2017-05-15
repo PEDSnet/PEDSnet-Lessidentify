@@ -40,7 +40,7 @@ perlbrew init
 perlbrew install perl-5.24.1
 perlbrew install-cpanm
 # Install PEDSnet::Lessidentify
-cpanm PEDSnet::Lessidenfity
+cpanm PEDSnet::Lessidentify
 # OR, if you want the bleeding edge
 cpanm https://github.com/PEDSnet/PEDSnet-Lessidentify
 ```
