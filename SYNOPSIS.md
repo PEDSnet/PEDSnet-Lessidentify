@@ -229,9 +229,12 @@ related to any individual, so that intervals are preserved.
         This is a little bit complicated.  If the out-of-threshold date is
         encountered on the **first** attempt to shift a date for that person,
         the offset is recomputed to place the shifted date between the
-        thresholds.  If it is encountered on a **subsequent** attempt to shift
-        a date, behaves like `warn`, since presumably in-threshold shifted
-        dates for that person already exist.
+        thresholds.  To avoid hanging on pathologic dates, it will only retry
+        a limited number of times before giving up with a warning.
+
+        If it is encountered on a **subsequent** attempt to shift a date,
+        behaves like `warn`, since presumably in-threshold shifted dates for
+        that person already exist.
 
         Defaults to [retry](https://metacpan.org/pod/retry).
 
