@@ -47,6 +47,7 @@ my %module_build_args = (
     "ExtUtils::MakeMaker" => 0,
     "File::Spec" => 0,
     "FindBin" => 0,
+    "Log::Any::Adapter::Carp" => 0,
     "Test::More" => 0
   }
 );
@@ -56,6 +57,7 @@ my %fallback_build_requires = (
   "ExtUtils::MakeMaker" => 0,
   "File::Spec" => 0,
   "FindBin" => 0,
+  "Log::Any::Adapter::Carp" => 0,
   "Module::Build" => "0.28",
   "Test::More" => 0
 );

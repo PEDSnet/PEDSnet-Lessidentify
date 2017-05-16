@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 
 use Test::More;
+use Log::Any::Adapter::Carp;  # dzil food
 
 use PEDSnet::Lessidentify::PEDSnet_CDM;
 
