@@ -596,7 +596,7 @@ not yet exist, a new one is generated.  The value must be one of
 C<undef>, a L<DateTime>, or an ISO-8601 format date(time).
 
 Typically, the offset is selected using person ID in I<$record>
-(cf. L</person_id_key).  However, you may specify an alternate person
+(cf. L</person_id_key>).  However, you may specify an alternate person
 ID with which to determine the offset in
 I<$options>C<<->{person_id}>>.  This may be useful if I<$record> does
 not contain a person ID, but in typical circumstances is not needed,
