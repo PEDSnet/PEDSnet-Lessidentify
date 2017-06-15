@@ -67,7 +67,8 @@ Several types of less-identification are done by default:
 =item *
 
 The values of attributes with names ending in C<_id> are remapped,
-except if the attribute ends in C<_concept_id>.
+except if the attribute ends in C<_concept_id>.  In addition, the
+C<npi> and C<dea> attributes are remapped.
 
 =item *
 
@@ -80,11 +81,13 @@ C<time_of_birth>, are datetime-shifted.
 
 =item *
 
-The values of attributes with names ending in C<_source_value> are redacted.
+The values of attributes with names ending in C<_source_value>, as
+well as C<provider_name> are redacted.
 
 =item *
 
-The values of the C<site> attribute are remapped as labels.
+The values of the C<site>, C<zip>, C<address_1>, C<address_2>,
+C<city> and C<county> attributes are remapped as labels.
 
 =back
 
@@ -96,11 +99,11 @@ sub _build__default_mappings {
 
   return {
     %$start,
-    remap_id => [ qr/(?<!_concept)_id$/i ],
+    remap_id => [ qr/(?<!_concept)_id$|^npi$|^dea$/i ],
     remap_date => [ qr/_date$/i ],
     remap_datetime => [ qr/^time_of_birth$|_time$/i ],
-    remap_label => [ 'site' ],
-    redact_value => [ qr/_source_value$/i ],
+    remap_label => [ qw/ site zip address_1 address_2 city county / ],
+    redact_value => [ qr/_source_value$|^provider_name$/i ],
   };
 }
 
