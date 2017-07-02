@@ -297,9 +297,9 @@ The following methods perform the actual work of scrubbing:
     `undef`, a [DateTime](https://metacpan.org/pod/DateTime), or an ISO-8601 format date(time).
 
     Typically, the offset is selected using person ID in _$record_
-    (cf. ["person\_id\_key).  However, you may specify an alternate person
+    (cf. ["person\_id\_key"](#person_id_key)).  However, you may specify an alternate person
     ID with which to determine the offset in
-    _$options_`<-`{person\_id}"](#person_id_key-however-you-may-specify-an-alternate-person-id-with-which-to-determine-the-offset-in-options-person_id)>.  This may be useful if _$record_ does
+    _$options_`<-`{person\_id}>>.  This may be useful if _$record_ does
     not contain a person ID, but in typical circumstances is not needed,
     and mismatch between the contents of _$record_ and
     _$options_`<-`{person\_id}>> may yield inconsistent results.
@@ -356,7 +356,7 @@ The following methods perform the actual work of scrubbing:
 
     Because the goal is to create a readable representation, only mapping
     information is saved.  Other aspects of the object, such as criteria
-    for matching data attributes to scrubbing methods, is not.  If your
+    for matching data attributes to scrubbing methods, are not.  If your
     goal is to freeze the entire state of the object, consider using a
     less readable but more versatile serializer such as [Storable](https://metacpan.org/pod/Storable).
 

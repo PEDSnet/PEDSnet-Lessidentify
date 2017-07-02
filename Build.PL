@@ -18,12 +18,13 @@ my %module_build_args = (
     "Charles Bailey <cbail\@cpan.org>"
   ],
   "dist_name" => "PEDSnet-Lessidentify",
-  "dist_version" => "1.00",
+  "dist_version" => "1.10",
   "license" => "open_source",
   "module_name" => "PEDSnet::Lessidentify",
   "recursive_test_files" => 1,
   "requires" => {
     "Carp" => 0,
+    "Data::Record" => 0,
     "DateTime" => 0,
     "JSON::MaybeXS" => 0,
     "Math::Random::Secure" => 0,
@@ -32,6 +33,7 @@ my %module_build_args = (
     "MooX::Options" => 0,
     "MooX::Role::Chatty" => 0,
     "Path::Tiny" => 0,
+    "Regexp::Common" => 0,
     "Rose::DateTime::Util" => 0,
     "Text::CSV" => 0,
     "Types::Standard" => 0,
