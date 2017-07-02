@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify::App::scrub_csv;
 
-our($VERSION) = '1.00';
+our($VERSION) = '1.10';
 
 =head1 NAME
 
