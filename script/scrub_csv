@@ -129,6 +129,7 @@ attributes.
 
 option 'redact' =>
   (isa => ArrayRef[Str], default => sub { [] }, is => 'ro',
+   coerce => sub { ref $_[0] ? $_[0] : [ @_ ] },
    format => 's@', autosplit => ',', required => 0,
    doc => 'attributes to redact (names or qr// expressions)');
 
@@ -143,6 +144,7 @@ preserved attributes.
 
 option 'preserve' =>
   (isa => ArrayRef[Str], default => sub { [] }, is => 'ro',
+   coerce => sub { ref $_[0] ? $_[0] : [ @_ ] },
    format => 's@', autosplit => ',', required => 0,
    doc => 'attributes to preserve (names or qr// expressions)');
 
@@ -163,6 +165,7 @@ merged.
 
 option 'force' =>
   (isa => ArrayRef[Str], default => sub { [] }, is => 'ro',
+   coerce => sub { ref $_[0] ? $_[0] : [ @_ ] },
    format => 's@', required => 0,
    doc => 'mappings to force (as key-value pairs)');
 
