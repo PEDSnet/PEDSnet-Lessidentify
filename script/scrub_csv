@@ -306,6 +306,9 @@ sub _eval_options {
   \@compiled;
 }
 
+# We do a lot of manual mapping of app params to object params since
+# we don't want to rely on MOP in order to avoid Moose (and hence
+# compiler) requirement
 sub _build__scrubber {
   my $self = shift;
   my $class = 'PEDSnet::Lessidentify';
@@ -318,9 +321,11 @@ sub _build__scrubber {
     Module::Runtime::require_module($class);
   }
 
+  $params{person_id_key} = $self->person_id_key if $self->person_id_key;
+  $params{birth_datetime_key} = $self->birth_datetime_key if $self->birth_datetime_key;
+
   $params{redact_attributes} = _eval_options($self->redact) if $self->redact->@*;
   $params{preserve_attributes} = _eval_options($self->preserve) if $self->preserve->@*;
-  $params{person_id_key} = $self->person_id_key if $self->person_id_key;
   if ($self->force) {
     my %fm;
     foreach my $val ($self->force->@*) {
@@ -330,6 +335,13 @@ sub _build__scrubber {
     }
     $params{force_mappings} = \%fm;
   }
+
+  $params{datetime_window_days} = $self->window_days if defined $self->window_days;
+  $params{before_date_threshold} = $self->min_date if $self->min_date;
+  $params{after_date_threshold} = $self->max_date if $self->max_date;
+  $params{date_threshold_action} = $self->date_threshold_action if $self->date_threshold_action;
+
+  $params{verbose} = $self->verbose if defined $self->verbose;
   
   $class->new(\%params);
 }
