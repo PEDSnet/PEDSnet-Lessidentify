@@ -847,7 +847,7 @@ If you do save state, be sure to take appropriate precautions.
 
 Because the goal is to create a readable representation, only mapping
 information is saved.  Other aspects of the object, such as criteria
-for matching data attributes to scrubbing methods, is not.  If your
+for matching data attributes to scrubbing methods, are not.  If your
 goal is to freeze the entire state of the object, consider using a
 less readable but more versatile serializer such as L<Storable>.
 
