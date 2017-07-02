@@ -879,8 +879,10 @@ sub save_maps {
 		    datetime_map => { map { $_ => { $dtm->{$_}->deltas } }
 				      keys %$dtm },
 		    datetime_window_days => $self->datetime_window_days,
-		    before_date_threshold => $self->before_date_threshold,
-		    after_date_threshold => $self->after_date_threshold,
+		    ( $self->before_date_threshold ?
+		      (before_date_threshold => $self->before_date_threshold->iso8601) : () ),
+		    ( $self->after_date_threshold ?
+		      (after_date_threshold => $self->after_date_threshold->iso8601) : () ),
 		    date_threshold_action => $self->date_threshold_action,
 		    datetime_to_age => $self->datetime_to_age,
 		    birth_datetime_key => $self->birth_datetime_key,
