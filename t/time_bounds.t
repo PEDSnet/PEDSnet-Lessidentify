@@ -34,11 +34,11 @@ isnt($remapped->{test_date}, $recs[1]->{test_date}, 'remap in-bounds date');
 
 $message = '';
 $less->scrub_record($recs[0]);
-like($message, qr/Early date warning: remapped 2014-01-02/, 'early warning');
+like($message, qr/Early date warning: remapped test_date 2014-01-02/, 'early warning');
 
 $message = '';
 $less->scrub_record($recs[2]);
-like($message, qr/Late date warning: remapped 2017-07-03/, 'late warning');
+like($message, qr/Late date warning: remapped test_date 2017-07-03/, 'late warning');
 
 $message = '';
 $less = PEDSnet::Lessidentify::PEDSnet_CDM->
@@ -57,13 +57,13 @@ $less = PEDSnet::Lessidentify::PEDSnet_CDM->
        verbose => -1);
 $less->scrub_record($recs[0]);
 like($message, qr/Can't get offset within date threshold/, "can't remap in bounds");
-like($message, qr/Early date warning: remapped 2014-01-02/, 'plus early warning');
+like($message, qr/Early date warning: remapped test_date 2014-01-02/, 'plus early warning');
 $message = '';
 $less->scrub_record($recs[1]);
 is($message, '', 'but no complaints with an in-bounds date');
 $message = '';
 $less->scrub_record($recs[2]);
-like($message, qr/Late date warning: remapped 2017-07-03/,
+like($message, qr/Late date warning: remapped test_date 2017-07-03/,
      'and late warning with an out-of-bounds date');
 
 

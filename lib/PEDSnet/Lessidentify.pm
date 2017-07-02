@@ -656,7 +656,7 @@ sub _do_datetime_to_age {
     $newstr += $new->{minutes} / 1440 + $new->{seconds} / 86400
       unless $flags->{date_only};
 
-    $self->remark("Date(time) $orig mapped to age $newstr for person $pid\n")
+    $self->remark("Date(time) $key $orig mapped to age $newstr for person $pid\n")
       if ($self->verbose >=2);
 
     $new = $newstr unless ref $rec->{$key};
@@ -681,7 +681,7 @@ sub _do_remap_datetime {
   
   return unless defined $pid and defined $orig and length $orig;
   $orig = parse_date($orig) unless ref $orig;
-  croak "Date parsing failure for $pid: $rec->{$key}"
+  croak "Date parsing failure for $pid: $key => $rec->{$key}"
     unless $orig;
   
   unless (exists $map->{$pid}) {
@@ -699,7 +699,7 @@ sub _do_remap_datetime {
 
       if ($i > 100) {
 	$self->logger->critical("Can't get offset within date threshold for $pid " .
-				"(starting from $orig with bounds of [" .
+				"(starting from $key $orig with bounds of [" .
 				($min ? $min : 'undef') . ($max ? $max : 'undef') .'])');
       }
     }
@@ -715,12 +715,12 @@ sub _do_remap_datetime {
 	join(', ', map { '$_ => ' . $deltas->{$_} }
 	     $flags->{date_only} ? ('days') : (qw/ days minutes seconds/ )) . ')';
     }
-    $self->remark("Date(time) $orig mapped to $new $offset for person $pid\n");
+    $self->remark("Date(time) $key $orig mapped to $new $offset for person $pid\n");
   }
 
-  $self->logger->warn("Early date warning: remapped $orig to $new for person $pid")
+  $self->logger->warn("Early date warning: remapped $key $orig to $new for person $pid")
     if $min and $new < $min;
-  $self->logger->warn("Late date warning: remapped $orig to $new for person $pid")
+  $self->logger->warn("Late date warning: remapped $key $orig to $new for person $pid")
     if $max and $new > $max;
 
   if ($flags->{date_only}) {
