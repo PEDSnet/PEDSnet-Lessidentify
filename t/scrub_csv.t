@@ -23,6 +23,7 @@ EOD
 	 '--preserve=value_source_value',
 	 '--redact=qr/^secret/',
 	 '--force=remap_label=site_id',
+	 '--verbose=0',
 	 "$tmpin", "$tmpout");
 
 my $app = eval { PEDSnet::Lessidentify::App::scrub_csv->new_with_options };

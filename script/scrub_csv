@@ -449,7 +449,7 @@ sub run {
       else {
 	$scrubbed = shift(@$files) || \*STDOUT;
       }
-      print "Converting $f to $scrubbed\n";
+      warn "Converting $f to $scrubbed\n" if $app->verbose;
       $done++ if $app->scrub_csv($f, $scrubbed);
     }
   }
