@@ -8,6 +8,7 @@ my(@recs) = ( {
 	       person_id => 1,
 	       test_date => '2014-01-02 04:05:06',
 	       label => 'first',
+	       sibling_id => 3,
 	       person_source_value => 'myob',
 	       value_source_value => 'alright',
 	       secret_value_source_value => 'bye-bye',
@@ -32,7 +33,8 @@ my(@recs) = ( {
 my $less = PEDSnet::Lessidentify::PEDSnet_CDM->
   new( redact_attributes => [ 'label', qr/^secret/ ],
        preserve_attributes => [ qr/value_source_value$/ ],
-       force_mappings => { remap_label => [ 'site_id' ] });
+       force_mappings => { remap_label => [ 'site_id' ] },
+       alias_attributes => { person_id => 'sibling_id' });
 
 my $remapped = $less->scrub_record($recs[0]);
 ok( !defined($remapped->{label}), 'Redacted specified attribute');
@@ -46,5 +48,9 @@ ok( !defined($remapped->{secret_value_source_value}),
 
 like($remapped->{site_id}, qr/^site_id_\d+$/,
      'Forced mapping applied');
+
+my $sib = $less->scrub_record($recs[2]);
+is($sib->{person_id}, $remapped->{sibling_id},
+   'Correctly aliases attribute');
 
 done_testing;

@@ -169,6 +169,24 @@ option 'force' =>
    format => 's@', required => 0,
    doc => 'mappings to force (as key-value pairs)');
 
+=item alias=I<map_name>=I<attr_spec>
+
+Specifies that ID or label replacements for attributes matching
+I<attr_spec> should be done using the map named I<map_name>.  See
+L<PEDSnet::Lessidentify/alias_attributes> for more detail about how
+attribute aliasing works.
+
+You may include this option multiple times to build up a larger list
+of aliases; multiple values for a given I<map_name> are merged.
+
+=cut
+
+option 'alias' =>
+  (isa => ArrayRef[Str], default => sub { [] }, is => 'ro',
+   coerce => sub { ref $_[0] ? $_[0] : [ @_ ] },
+   format => 's@', autosplit => ',', required => 0,
+   doc => 'attributes to alias (name=alias)');
+
 =item window_days=I<n>
 
 Width of the window within which dates/times will be shifted.
@@ -339,7 +357,15 @@ sub _build__scrubber {
     }
     $params{force_mappings} = \%fm;
   }
-
+  if ($self->alias) {
+    my %al;
+    foreach my $val ($self->alias->@*) {
+      my($meth, $spec) = split /=/, $val, 2;
+      $al{$meth} //= [];
+      push $al{$meth}->@*, _eval_options( [ split /,/, $spec ] );
+    }
+    $params{alias_attributes} = \%al;
+  }
   $params{datetime_window_days} = $self->window_days if defined $self->window_days;
   $params{before_date_threshold} = $self->min_date if $self->min_date;
   $params{after_date_threshold} = $self->max_date if $self->max_date;
