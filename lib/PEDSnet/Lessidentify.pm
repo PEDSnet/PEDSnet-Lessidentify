@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify;
 
-our($VERSION) = '1.10';
+our($VERSION) = '1.20';
 
 use Carp qw(croak);
 
@@ -1090,7 +1090,7 @@ Are there, for certain, but have yet to be cataloged.
 
 =head1 VERSION
 
-version 1.00
+version 1.20
 
 =head1 AUTHOR
 

@@ -472,7 +472,7 @@ Are there, for certain, but have yet to be cataloged.
 
 # VERSION
 
-version 1.00
+version 1.20
 
 # AUTHOR
 
