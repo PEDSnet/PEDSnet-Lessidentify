@@ -30,6 +30,7 @@ my %module_build_args = (
     "Math::Random::Secure" => 0,
     "Module::Runtime" => 0,
     "Moo" => 2,
+    "MooX::ConfigFromFile" => 0,
     "MooX::Options" => 0,
     "MooX::Role::Chatty" => 0,
     "Path::Tiny" => 0,
