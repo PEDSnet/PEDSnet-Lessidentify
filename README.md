@@ -21,11 +21,11 @@ If you have a recent version (5.24 or later) of Perl installed, you have several
 
 ```
 # Interactive package installer distributed with Perl
-cpan PEDSnet::Lessidentify
+# cpan PEDSnet::Lessidentify
 # cpanminus - released version
-cpanm PEDSnet::Lessidentify
+# cpanm PEDSnet::Lessidentify
 # cpanminus - current development version
-cpanm https://github.com/PEDSnet/PEDSnet-Lessidentify
+cpanm git://github.com/PEDSnet/PEDSnet-Lessidentify
 ```
 
 #### New Perl5 Installation
@@ -40,9 +40,9 @@ perlbrew init
 perlbrew install perl-stable
 perlbrew install-cpanm
 # Install PEDSnet::Lessidentify
-cpanm PEDSnet::Lessidentify
+# cpanm PEDSnet::Lessidentify
 # OR, if you want the bleeding edge
-cpanm https://github.com/PEDSnet/PEDSnet-Lessidentify
+cpanm git://github.com/PEDSnet/PEDSnet-Lessidentify
 ```
 
 If building from source isn't an option for you, visit http://www.perl.org/get.html for binary versions, each of which comes with a package manager that should let you add on the released version of `PEDSnet::Lessidentify`.
