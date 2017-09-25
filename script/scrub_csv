@@ -54,10 +54,7 @@ or option is present, output is sent to C<STDOUT>.
 In addition to directing output, command line options are used to
 configure the most common settings for the less-identification
 process.  These options may be specified on the command line or in a
-L<Config::Any>-compatible configuration file with the stem
-F</path/to/scrub_csv>. For additional details about their behavior,
-see the documentation for L<PEDSnet::Lessidentify> or whatever
-subclass you're using.
+L<Config::Any>-compatible configuration file.
 
 =head2 OPTIONS
 
@@ -309,6 +306,32 @@ progress, and higher values for debugging.
 option 'verbose' =>
   (isa => Int, is => 'ro', format => 'i', required => 0,
   doc => 'output progress/debugging messages');
+
+=item config_files=I<path>
+
+Path(s) to configuration files to be used to supplement command line
+options.  The files must be compatible with L<Config::Any>.
+
+Specifying this option overrides searching for configuration files
+using L</config_prefix>; if none of the named files are found, then no
+further attempt is made to locate configuration files.
+
+=item config_prefix=I<stem>
+
+Basename to use when searching for configuration files, if
+L</config_files> is not present.  Defaults to the basename of the
+running program.
+
+=item config_dirs=I<dir>
+
+Directory(s) in which to search for configuration files, if
+L</config_files> is not specified.  Defaults are taken from
+L<MooX::File::ConfigDir>, and include most places you might typically
+store configuration files.  Note, however, that the current working
+directory is not included, though its F<etc> subdirectory, if it
+exists, is.
+
+=cut
 
 has '_scrubber' =>
   (isa => InstanceOf['PEDSnet::Lessidentify'], is => 'ro', init_arg => undef,
