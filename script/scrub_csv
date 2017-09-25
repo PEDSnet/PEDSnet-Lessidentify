@@ -77,12 +77,34 @@ use MooX::Options
 
 use Types::Standard qw/ Str Int ArrayRef InstanceOf /;
 
+=item cdm_type=I<class>
+
+Specifies a CDM-specific subclass of L<PEDSnet::Lessidentify> to use
+as the base for scrubbing.  The C<_CDM> suffix is added if it's not
+present on I<class>.
+
+You will typically want to use this or a configuration file for basic
+configuration, as that's easier than trying to list everything on the
+command line.
+
+=cut
+
+option 'cdm_type' =>
+  (isa => Str, , is => 'ro', format => 's', required => 0,
+   doc => 'use a CDM-specific subclass for the scrubber');
+
 =item person_id_key=I<attr_name>
 
 Specifies that the attribute named I<attr_name> contains a unique
 person ID in the data.  This is used to maintain consistent
 person-specific mappings, so you'll likely want to provide this in
 most cases.
+
+For all but the simplest cases, you will need to make sure this
+configuration element is correct, either by specifying it directly or
+via L</cdm_type>.  Key aspects such as date shifts rely on accurately
+identifying the person to whom a record pertains, and not being able
+to do so is likely to yield garbage.
 
 =cut
 
@@ -102,18 +124,6 @@ transforming dates to ages.
 option 'birth_datetime_key' =>
   (isa => Str, , is => 'ro', format => 's', required => 0,
    doc => 'name of attribute containing date of birth');
-
-=item cdm_type=I<class>
-
-Specifies a CDM-specific subclass of L<PEDSnet::Lessidentify> to use
-as the base for scrubbing.  The C<_CDM> suffix is added if it's not
-present on I<class>.
-
-=cut
-
-option 'cdm_type' =>
-  (isa => Str, , is => 'ro', format => 's', required => 0,
-   doc => 'use a CDM-specific subclass for the scrubber');
 
 =item redact=I<attr_spec,attr_spec>
 
@@ -396,6 +406,10 @@ sub _build__scrubber {
 
   $params{verbose} = $self->verbose if defined $self->verbose;
   
+  if ($class eq 'PEDSnet::Lessidentify' and not exists $params{person_id_key}) {
+    warn "It appears that person_id_key is not defined; this may cause problems\n"
+  }
+
   $class->new(\%params);
 }
 
