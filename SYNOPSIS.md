@@ -466,6 +466,16 @@ Any message produced by an included package, as well as
     didn't look like a date or time, as understood by
     ["parse\_date" in Rose::DateTime::Util](https://metacpan.org/pod/Rose::DateTime::Util#parse_date). 
 
+- **No person ID** (W)
+
+    One of the date(time)-shifting functions couldn't find a person ID
+    with which to ground the shift, so it returned nothing.
+
+- **No **_type_** date for **_person_ (W)
+
+    One of the date(time)-shifting functions couldn't find a value for the
+    date you wanted to shift, so it returned nothing.
+
 # BUGS AND CAVEATS
 
 Are there, for certain, but have yet to be cataloged.

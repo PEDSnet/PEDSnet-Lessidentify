@@ -8,7 +8,7 @@ package PEDSnet::Lessidentify;
 
 our($VERSION) = '1.20';
 
-use Carp qw(croak);
+use Carp qw(carp croak);
 
 use Moo 2;
 use experimental 'smartmatch';
@@ -678,7 +678,15 @@ sub _do_datetime_to_age {
   my $map = $self->_datetime_map;
   my($new, $newstr);
     
-  return unless defined $pid and defined $orig and length $orig;
+  unless (defined $pid and length $pid) {
+    carp "No person ID; can't determine age";
+    return;
+  }
+  unless (defined $orig and length $orig) {
+    carp "No $key date for $pid; can't determine age";
+    return;
+  }
+
   $orig = parse_date($orig) unless ref $orig;
   croak "Date parsing failure for $pid: $rec->{$key}"
     unless $orig;
@@ -722,7 +730,15 @@ sub _do_remap_datetime {
   
   if (not $action or $action eq 'none') { undef $min; undef $max }
   
-  return unless defined $pid and defined $orig and length $orig;
+  unless (defined $pid and length $pid) {
+    carp "No person ID; can't build date offset";
+    return;
+  }
+  unless (defined $orig and length $orig) {
+    carp "No $key date for $pid; can't offset";
+    return;
+  }
+
   $orig = parse_date($orig) unless ref $orig;
   croak "Date parsing failure for $pid: $key => $rec->{$key}"
     unless $orig;
@@ -1081,6 +1097,16 @@ Any message produced by an included package, as well as
 You passed a string to one of the date(time)-shifting functions that
 didn't look like a date or time, as understood by
 L<Rose::DateTime::Util/parse_date>. 
+
+=item B<No person ID> (W)
+
+One of the date(time)-shifting functions couldn't find a person ID
+with which to ground the shift, so it returned nothing.
+
+=item B<No >I<type>B< date for >I<person> (W)
+
+One of the date(time)-shifting functions couldn't find a value for the
+date you wanted to shift, so it returned nothing.
 
 =back
 
