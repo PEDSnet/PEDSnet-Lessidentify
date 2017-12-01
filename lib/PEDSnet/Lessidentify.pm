@@ -13,7 +13,7 @@ use Carp qw(carp croak);
 use Moo 2;
 use experimental 'smartmatch';
 use Types::Standard qw/ Any Maybe Bool Str StrictNum ArrayRef
-			HashRef Enum InstanceOf /;
+			Num HashRef Enum InstanceOf /;
 
 use DateTime;
 use Math::Random::Secure qw(rand irand);
@@ -448,6 +448,28 @@ has 'date_threshold_action' =>
 
 sub build_date_threshold_action { 'retry' }
 
+=item datetime_jitter
+
+Introduces the specified amount of noise into each shifted date or
+datetime.  This results in intervals not being precisely preserved,
+which may make it somewhat more difficult to match data for an
+individual across more than one dataset.
+
+If the quantity being shifted is a date or datetime, the amount of
+noise (in days) is drawn from a normal distribution with mean of 0 and
+standard deviation of this option's value.  If L</datetime_to_age> is
+in effect, then the noise is computed as a fraction of the age, drawn
+from a normal distribution with mean of 0 and standard deviation of
+this option's value, taken as a percentage.
+
+=cut
+
+has 'datetime_jitter' =>
+  ( isa => Num, is => 'rwp', lazy => 1,
+    builder => 'build_datetime_jitter' );
+
+sub build_datetime_jitter { 0 }
+
 =item datetime_to_age
 
 If this is set, date/time values are converted to intervals from the
@@ -600,7 +622,7 @@ sub remap_label {
 
 # =item _new_time_offset( $person_id )
 #
-# Create new person-specific date/datetime offset, +/- 183 days.  The
+# Create new person-specific date/datetime offset, +/- $win days.  The
 # offset is guaranteed to be at least one day.
 #
 # Returns a DateTime::Duration object representing that offset.
@@ -951,6 +973,8 @@ sub save_maps {
 		      (before_date_threshold => $self->before_date_threshold->iso8601) : () ),
 		    ( $self->after_date_threshold ?
 		      (after_date_threshold => $self->after_date_threshold->iso8601) : () ),
+		    ( $self->datetime_jitter ?
+		      (datetime_jitter => $self->datetime_jitter) : () ),
 		    date_threshold_action => $self->date_threshold_action,
 		    datetime_to_age => $self->datetime_to_age,
 		    birth_datetime_key => $self->birth_datetime_key,
@@ -1023,8 +1047,12 @@ sub load_maps {
   $self->_set__datetime_map($dtm);
   $self->_set_datetime_window_days($state->{datetime_window_days});
   $self->_set_datetime_to_age($state->{datetime_to_age});
-  $self->_set_before_date_threshold($state->{before_date_threshold});
-  $self->_set_after_date_threshold($state->{after_date_threshold});
+  $self->_set_before_date_threshold($state->{before_date_threshold})
+    if exists $state->{before_date_threshold};
+  $self->_set_after_date_threshold($state->{after_date_threshold})
+    if exists $state->{after_date_threshold};
+  $self->_set_datetime_jitter($state->{datetime_jitter})
+    if exists $state->{datetime_jitter};
   $self->_set_date_threshold_action($state->{date_threshold_action});
   $self->_set_birth_datetime_key($state->{birth_datetime_key});
 
