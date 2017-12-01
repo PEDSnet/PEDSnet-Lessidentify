@@ -298,8 +298,8 @@ The following methods perform the actual work of scrubbing:
 - remap\_id($record, $key, $options)
 
     Return a numeric substitute value for the contents of _$record->{$key}_.  In list context, returns the original value,
-    followed by the substitute.  If the original value is `undef`, then
-    `undef` is returned.
+    followed by the substitute.  If the original value is `undef` or an
+    empty string, then it is returned unchanged.
 
     If _$options_ is present, it must be a hash reference.  The key
     `map_name`, if present, specifies a name to use rather than _$key_

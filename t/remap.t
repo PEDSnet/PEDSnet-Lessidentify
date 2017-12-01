@@ -91,4 +91,22 @@ like(scalar $less->remap_label({ person_id => 1, greatest_fear => 'bugs' },
      qr/^greatest_fear_\d+$/,
     'remap_label preserves label');
 
+is(scalar $less->remap_label({ person_id => 1, greatest_fear => '' },
+			       'greatest_fear'),
+   '',
+   'remap_label does not expand empty string');
+
+ok(!defined $less->remap_label({ person_id => 1, greatest_fear => undef },
+			       'greatest_fear'),
+   'remap_label does not expand undef');
+
+is(scalar $less->remap_id({ person_id => 1, test_id => '' },
+			  'test_id'),
+   '',
+   'remap_id does not expand empty string');
+
+ok(!defined $less->remap_id({ person_id => 1, test_id => undef },
+			    'test_id'),
+   'remap_id does not expand undef');
+
 done_testing;
