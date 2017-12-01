@@ -4,7 +4,9 @@ use FindBin ();
 use Path::Tiny;
 use Test::More;
 
-unshift @INC, path($FindBin::Bin)->sibling('script')->canonpath;
+my $appdir = path($FindBin::Bin)->sibling('script');
+
+unshift @INC, $appdir->canonpath;
 
 ok(require('scrub_csv'), 'Load scrub_csv');
 
@@ -39,5 +41,11 @@ isnt( $rslt[1][6], 'bye-bye', 'redacted specified attribute');
 is( $rslt[3][5], 'ok', 'preserved specified attribute');
 like( $rslt[4][-1], qr/site/, 'forced specified mapping');
 is( $rslt[1][0], $rslt[2][3], 'aliased specified attribute');
+
+my $prog = $appdir->child('scrub_csv')->canonpath;
+my $msg = `$prog --cdm_type=PEDSnet --version`;
+
+like($msg, qr/^PEDSnet::Lessidentify version/m, 'Library version');
+like($msg, qr/scrub_csv version/, 'App version');
 
 done_testing;

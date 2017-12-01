@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify::App::scrub_csv;
 
-our($VERSION) = '1.20';
+our($VERSION) = '1.30';
 
 =head1 NAME
 
@@ -317,6 +317,19 @@ option 'verbose' =>
   (isa => Int, is => 'ro', format => 'i', required => 0,
   doc => 'output progress/debugging messages');
 
+=item version
+
+Output information about the version of L</scrub_csv> and backend
+modules, then exit.  If a crosswalk file is also specified, it will be
+read before version information is printed, in order to allow
+backend modules to be loaded.
+
+=cut
+
+option 'version' =>
+  (is => 'ro', required => 0,
+  doc => 'output version information');
+
 =item config_files=I<path>
 
 Path(s) to configuration files to be used to supplement command line
@@ -499,6 +512,18 @@ sub run {
     }
   }
   
+  if ($app->version) {
+    no strict 'refs';
+    my $dummy = $app->_scrubber;
+    foreach my $m (sort { length $a <=> length $b }
+		   grep { /^PEDSnet.Lessidentify/ } keys %INC) {
+      my $v = $m =~ s/\.pm$//r;
+      $v =~ s/[\/\\.]/::/g;
+      say $v . ' version ' . ${ $v . '::VERSION' };
+    }
+    exit 0;
+  }
+
   if (@$files) {
     while (@$files) {
       my $f = shift @$files;
