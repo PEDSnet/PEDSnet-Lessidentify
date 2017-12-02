@@ -18,7 +18,7 @@ my %module_build_args = (
     "Charles Bailey <cbail\@cpan.org>"
   ],
   "dist_name" => "PEDSnet-Lessidentify",
-  "dist_version" => "1.30",
+  "dist_version" => "1.40",
   "license" => "open_source",
   "module_name" => "PEDSnet::Lessidentify",
   "recursive_test_files" => 1,
@@ -27,6 +27,7 @@ my %module_build_args = (
     "Data::Record" => 0,
     "DateTime" => 0,
     "JSON::MaybeXS" => 0,
+    "Math::Random" => 0,
     "Math::Random::Secure" => 0,
     "Module::Runtime" => 0,
     "Moo" => 2,

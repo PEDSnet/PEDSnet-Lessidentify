@@ -6,13 +6,13 @@ use warnings;
 
 package PEDSnet::Lessidentify;
 
-our($VERSION) = '1.30';
+our($VERSION) = '1.40';
 
 use Carp qw(carp croak);
 
 use Moo 2;
 use experimental 'smartmatch';
-use Types::Standard qw/ Any Maybe Bool Str StrictNum ArrayRef
+use Types::Standard qw/ Any Maybe Bool Str StrictNum ArrayRef CodeRef
 			Num HashRef Enum InstanceOf /;
 
 use DateTime;
@@ -124,6 +124,12 @@ has '_id_counters' =>
 has '_id_remap_blocks' =>
   ( isa => HashRef, is => 'ro', init_arg => undef,
     default => sub { { all => [] } } );
+
+# Generator function for jitter intervals
+# Not saved as state.
+has '_datetime_jitter_fn' =>
+  ( isa => CodeRef, is => 'ro', init_arg => undef,
+    lazy => 1, default => sub { require Math::Random; \&Math::Random::gennor; } );
 
 # Datetime map for individual persons
 # If converting dates to ages, this is the person's base
@@ -699,6 +705,7 @@ sub _do_datetime_to_age {
   my $pid = $opts->{person_id} // $rec->{ $self->person_id_key };
   my $orig = $rec->{$key};
   my $map = $self->_datetime_map;
+  my $jitter = $self->datetime_jitter;
   my($new, $newstr);
     
   unless (defined $pid and length $pid) {
@@ -724,6 +731,11 @@ sub _do_datetime_to_age {
 
   $new = $orig->subtract_datetime( $map->{$pid} );
 
+  if ($jitter) {
+    my $jump = $self->_datetime_jitter_fn->(0, $jitter) / 100;
+    $new = $new->multiply($jump);
+  }
+
   if ($self->verbose >=2 or not ref $rec->{$key}) {
     my $newstr = $new->deltas;
     $newstr = $new->{months} + $new->{days} / 30.44;
@@ -747,8 +759,9 @@ sub _do_remap_datetime {
   my $pid = $opts->{person_id} // $rec->{ $self->person_id_key };
   my $orig = $rec->{$key};
   my $map = $self->_datetime_map;
-  my($min, $max, $action) = ($self->before_date_threshold, $self->after_date_threshold,
-			    $self->date_threshold_action);
+  my($min, $max, $action, $jitter) =
+    ( $self->before_date_threshold, $self->after_date_threshold,
+      $self->date_threshold_action, $self->datetime_jitter );
   my $new;
   
   if (not $action or $action eq 'none') { undef $min; undef $max }
@@ -788,6 +801,13 @@ sub _do_remap_datetime {
   }
 
   $new = $orig + $map->{$pid};
+
+  if ($jitter) {
+    my $jump = $self->_datetime_jitter_fn->(0, $jitter);
+    my $days = int($jump);
+    my $min = int( ($jump - $days) * 24 * 60);
+    $new = $new + DateTime::Duration->new(days => $days, minutes => $min);
+  }
 
   if ($self->verbose >= 2) {
     my $offset = '';

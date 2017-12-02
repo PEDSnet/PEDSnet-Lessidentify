@@ -86,6 +86,21 @@ unlike(scalar $less->remap_datetime({ person_id => $pid,
      qr/00:00:00$/,
      "...and doesn't truncate to to midnight with non-midnight input");
 
+my @trials;
+push @trials,
+  scalar $less->remap_date({ person_id => 1,
+			     testme => '2014-01-15 12:34:56' }, 'testme');
+$less->_set_datetime_jitter(30);
+for (1..3) {
+  push @trials,
+    scalar $less->remap_date({ person_id => 1,
+			       testme => '2014-01-15 12:34:56' }, 'testme');
+}
+my @diff = grep { $_ cmp $trials[0] } @trials;
+ok( scalar(@diff) > 0, 'datetime_jitter shifts dates');
+isnt($diff[0], $diff[1], 'datetime_jitter produces different jitter');
+
+
 like(scalar $less->remap_label({ person_id => 1, greatest_fear => 'bugs' },
 			       'greatest_fear'),
      qr/^greatest_fear_\d+$/,

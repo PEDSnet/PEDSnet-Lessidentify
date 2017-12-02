@@ -262,6 +262,20 @@ related to any individual, so that intervals are preserved.
 
         Defaults to [retry](https://metacpan.org/pod/retry).
 
+- datetime\_jitter
+
+    Introduces the specified amount of noise into each shifted date or
+    datetime.  This results in intervals not being precisely preserved,
+    which may make it somewhat more difficult to match data for an
+    individual across more than one dataset.
+
+    If the quantity being shifted is a date or datetime, the amount of
+    noise (in days) is drawn from a normal distribution with mean of 0 and
+    standard deviation of this option's value.  If ["datetime\_to\_age"](#datetime_to_age) is
+    in effect, then the noise is computed as a fraction of the age, drawn
+    from a normal distribution with mean of 0 and standard deviation of
+    this option's value, taken as a percentage.
+
 - datetime\_to\_age
 
     If this is set, date/time values are converted to intervals from the
