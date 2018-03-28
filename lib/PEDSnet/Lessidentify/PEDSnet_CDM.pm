@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify::PEDSnet_CDM;
 
-our($VERSION) = '1.00';
+our($VERSION) = '2.00';
 
 use Moo 2;
 
@@ -34,9 +34,9 @@ PEDSnet::Lessidentify::PEDSnet_CDM - Make a PEDSnet CDM dataset less identifiabl
 =head1 DESCRIPTION
 
 This subclass of L<PEDSnet::Lessidentify> is configured operate on
-datasets conforming to the PEDSnet Common Data Model, or by extension
-the OMOP/OHDSI Common Data Model.  In particular, it implements the
-following: 
+datasets conforming to the PEDSnet Common Data Model v2.6 or later, or by
+extension the OMOP/OHDSI Common Data Model.  In particular, it
+implements the following:
 
 =over 4
 
@@ -51,12 +51,12 @@ sub build_person_id_key { 'person_id'; }
 
 =item *
 
-The C<time_of_birth> attribute of a record is used as the datetime of
+The C<birth_datetime> attribute of a record is used as the datetime of
 birth. 
 
 =cut
 
-sub build_birth_datetime_key { 'time_of_birth' }
+sub build_birth_datetime_key { 'birth_datetime' }
 
 =item *
 
@@ -76,8 +76,9 @@ The values of attributes with names ending in C<_date> are date-shifted.
 
 =item *
 
-The values of attributes with names ending in C<_time>, as well as
-C<time_of_birth>, are datetime-shifted.
+The values of attributes with names ending in C<_time> or
+C<_datetime>, as well as C<time_of_birth> for historical reasons, are
+datetime-shifted.
 
 =item *
 
@@ -101,7 +102,7 @@ sub _build__default_mappings {
     %$start,
     remap_id => [ qr/(?<!_concept)_id$|^npi$|^dea$/i ],
     remap_date => [ qr/_date$/i ],
-    remap_datetime => [ qr/^time_of_birth$|_time$/i ],
+    remap_datetime => [ qr/^time_of_birth$|_time$|_datetime$/i ],
     remap_label => [ qw/ site zip address_1 address_2 city county / ],
     redact_value => [ qr/_source_value$|^provider_name$/i ],
   };
