@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify;
 
-our($VERSION) = '1.50';
+our($VERSION) = '1.51';
 
 use Carp qw(carp croak);
 
@@ -20,6 +20,20 @@ use Math::Random::Secure qw(rand irand);
 use Rose::DateTime::Util qw(parse_date);
 
 with 'MooX::Role::Chatty';
+
+sub _parse_date {
+  my $dt = shift;
+  return undef unless defined $dt;
+
+  my $tz = undef;
+  if (!ref $dt and $dt =~ /(.+:\d+)([+\-]\d+)/) {
+    $dt = $1;
+    $tz = substr $2 . '00000', 0, 5;
+  }
+
+  parse_date($dt, $tz);
+}
+
 
 =head1 NAME
 
@@ -402,14 +416,14 @@ so.
 
 has 'before_date_threshold' =>
   ( isa => Maybe[InstanceOf['DateTime']], is => 'rwp', required => 0, lazy => 1,
-    coerce => sub { ref $_[0] ? $_[0] : parse_date($_[0]) },
+    coerce => sub { ref $_[0] ? $_[0] : _parse_date($_[0]) },
     builder => 'build_before_date_threshold' );
 
 sub build_before_date_threshold {}
 
 has 'after_date_threshold' =>
   ( isa => Maybe[InstanceOf['DateTime']], is => 'rwp', required => 0, lazy => 1,
-    coerce => sub { ref $_[0] ? $_[0] : parse_date($_[0]) },
+    coerce => sub { ref $_[0] ? $_[0] : _parse_date($_[0]) },
     builder => 'build_after_date_threshold' );
 
 sub build_after_date_threshold {}
@@ -717,7 +731,7 @@ sub _do_datetime_to_age {
     return;
   }
 
-  $orig = parse_date($orig) unless ref $orig;
+  $orig = _parse_date($orig) unless ref $orig;
   croak "Date parsing failure for $pid: $rec->{$key}"
     unless $orig;
   
@@ -775,7 +789,7 @@ sub _do_remap_datetime {
     return;
   }
 
-  $orig = parse_date($orig) unless ref $orig;
+  $orig = _parse_date($orig) unless ref $orig;
   croak "Date parsing failure for $pid: $key => $rec->{$key}"
     unless $orig;
   
@@ -1145,7 +1159,8 @@ Any message produced by an included package, as well as
 
 You passed a string to one of the date(time)-shifting functions that
 didn't look like a date or time, as understood by
-L<Rose::DateTime::Util/parse_date>. 
+L<Rose::DateTime::Util/parse_date> (optionally with a timezone offset
+added).
 
 =item B<No person ID> (W)
 

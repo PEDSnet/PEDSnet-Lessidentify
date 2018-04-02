@@ -18,7 +18,7 @@ my %module_build_args = (
     "Charles Bailey <cbail\@cpan.org>"
   ],
   "dist_name" => "PEDSnet-Lessidentify",
-  "dist_version" => "1.50",
+  "dist_version" => "1.51",
   "license" => "open_source",
   "module_name" => "PEDSnet::Lessidentify",
   "recursive_test_files" => 1,

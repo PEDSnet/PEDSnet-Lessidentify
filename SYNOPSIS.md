@@ -478,7 +478,8 @@ Any message produced by an included package, as well as
 
     You passed a string to one of the date(time)-shifting functions that
     didn't look like a date or time, as understood by
-    ["parse\_date" in Rose::DateTime::Util](https://metacpan.org/pod/Rose::DateTime::Util#parse_date). 
+    ["parse\_date" in Rose::DateTime::Util](https://metacpan.org/pod/Rose::DateTime::Util#parse_date) (optionally with a timezone offset
+    added).
 
 - **No person ID** (W)
 
