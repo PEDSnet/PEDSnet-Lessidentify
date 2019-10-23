@@ -26,11 +26,16 @@ sub _parse_date {
   return undef unless defined $dt;
 
   my $tz = undef;
-  if (!ref $dt and $dt =~ /(.+:\d+)([+\-]\d+)/) {
-    $dt = $1;
-    $tz = substr $2 . '00000', 0, 5;
+  if (!ref $dt) {
+    if ($dt =~ /(.+:\d+)([+\-]\d+)/) {
+      $dt = $1;
+      $tz = substr $2 . '00000', 0, 5;
+    }
+    elsif ($dt =~ /(.+:\d+)Z$/) {
+      $dt = $1;
+      $tz = 'UTC'
+    }
   }
-
   parse_date($dt, $tz);
 }
 
