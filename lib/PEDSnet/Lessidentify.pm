@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify;
 
-our($VERSION) = '1.51';
+our($VERSION) = '1.60';
 
 use Carp qw(carp croak);
 
