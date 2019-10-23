@@ -926,7 +926,7 @@ sub scrub_record {
 
   foreach my $k (keys %new) {
     $new{$k} = $self->redact_value($rec, $k), next if $k ~~ $redact;
-    next if $k ~~ $preserve;
+    next if $k ~~ $preserve or !defined($rec->{$k}) or !length($rec->{$k});
 
     my $options = {};
 
