@@ -104,7 +104,7 @@ sub _build__default_mappings {
     remap_date => [ qr/_date$/i ],
     remap_datetime => [ qr/^time_of_birth$|_time$|_datetime$/i ],
     remap_label => [ qw/ site zip address_1 address_2 city county / ],
-    redact_value => [ qr/_source_value$|^provider_name$/i ],
+    redact_value => [ qr/_source_value$|^provider_name$|^care_site_name$|^sig$|^plan_name$/i ],
   };
 }
 
