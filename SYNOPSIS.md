@@ -60,7 +60,7 @@ with that person, insuring that intervals are preserved.
 
 For additional details, see the documentation for methods below.
 
-What [PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet::Lessidentify) does not do is provide any guarantee of
+What [PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet%3A%3ALessidentify) does not do is provide any guarantee of
 k-anonymity (other than the trivial k == 1) or similar strong
 anonymization.  It is simply a tool to reduce the impact of the most
 likely sources of reidentification.
@@ -72,10 +72,10 @@ less-identification (a.k.a. scrubbing) of records:
 
 ### What to scrub
 
-[PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet::Lessidentify) operates by identifying specific attributes
+[PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet%3A%3ALessidentify) operates by identifying specific attributes
 of each record (think columns in a table) and mapping them to new,
 presumably less identifiable, values (described below).  However,
-[PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet::Lessidentify) itself has no preconceptions about what to
+[PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet%3A%3ALessidentify) itself has no preconceptions about what to
 scrub.  Typically, you will use a subclass that provides some default
 rules for scrubbing, but if not, or if you need to change those
 defaults, you may find these attributes following useful.
@@ -198,7 +198,7 @@ changes.
 ### Dates and times
 
 Because intervals between events are frequently important components
-of analyses, [PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet::Lessidentify) treats them differently from
+of analyses, [PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet%3A%3ALessidentify) treats them differently from
 other potential identifiers.  Dates and times are shifted by an amount
 that differs for each person, but remains the same for all dates
 related to any individual, so that intervals are preserved.  
@@ -210,7 +210,7 @@ related to any individual, so that intervals are preserved.
 
     There is no default for this value, so you generally need to set it
     for date/time shifts to work properly.  If you're using a subclass of
-    [PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet::Lessidentify), there's a good chance the subclass sets it
+    [PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet%3A%3ALessidentify), there's a good chance the subclass sets it
     for you.
 
 - datetime\_window\_days
@@ -302,7 +302,7 @@ related to any individual, so that intervals are preserved.
 
     There is no default for this value, so you generally need to set it
     for date/time to age mapping to work properly.  If you're using a
-    subclass of [PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet::Lessidentify), the subclass may have set it
+    subclass of [PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet%3A%3ALessidentify), the subclass may have set it
     for you.
 
 ## METHODS
@@ -407,7 +407,7 @@ The following methods perform the actual work of scrubbing:
 
     If present, _$opts_ must be a hash reference.  If the key
     `json_options` is present, the associated value will be passed to
-    ["new" in JSON::MaybeXS](https://metacpan.org/pod/JSON::MaybeXS#new) to set formatting of the JSON.
+    ["new" in JSON::MaybeXS](https://metacpan.org/pod/JSON%3A%3AMaybeXS#new) to set formatting of the JSON.
 
     Returns $path if successful, and raises an exception if an error is
     encountered.
@@ -422,21 +422,21 @@ The following methods perform the actual work of scrubbing:
 
     If present, _$opts_ must be a hash reference.  If the key
     `json_options` is present, the associated value will be passed to
-    ["new" in JSON::MaybeXS](https://metacpan.org/pod/JSON::MaybeXS#new) to set formatting of the JSON.
+    ["new" in JSON::MaybeXS](https://metacpan.org/pod/JSON%3A%3AMaybeXS#new) to set formatting of the JSON.
 
     Returns the caling object if successful, and raises an exception if an
     error is encountered reading the saved state.
 
 ## SUBCLASSING
 
-By default, [PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet::Lessidentify) doesn't do much; it's there to
+By default, [PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet%3A%3ALessidentify) doesn't do much; it's there to
 provide tools.  You can construct a working scrubber by setting
 attributes appropriately at object construction time, of course.  But
 if you anticipate having to deal with particular kinds of data
 repeatedly, it may be useful to wrap the boilerplate up in a subclass.
 
 In addition to overriding any of the mapping methods in
-[PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet::Lessidentify) or adding new ones, you'll likely want to
+[PEDSnet::Lessidentify](https://metacpan.org/pod/PEDSnet%3A%3ALessidentify) or adding new ones, you'll likely want to
 address two things:
 
 - build\_person\_id\_key
@@ -478,7 +478,7 @@ Any message produced by an included package, as well as
 
     You passed a string to one of the date(time)-shifting functions that
     didn't look like a date or time, as understood by
-    ["parse\_date" in Rose::DateTime::Util](https://metacpan.org/pod/Rose::DateTime::Util#parse_date) (optionally with a timezone offset
+    ["parse\_date" in Rose::DateTime::Util](https://metacpan.org/pod/Rose%3A%3ADateTime%3A%3AUtil#parse_date) (optionally with a timezone offset
     added).
 
 - **No person ID** (W)

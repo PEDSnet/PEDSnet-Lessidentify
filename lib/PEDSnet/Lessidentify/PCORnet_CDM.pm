@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify::PCORnet_CDM;
 
-our($VERSION) = '1.00';
+our($VERSION) = '2.00';
 
 use Moo 2;
 
@@ -78,8 +78,13 @@ datetime-shifted.
 
 =item *
 
+Values identifying sites, lot numbers, and free-text PRO responses are remapped
+as labels.
+
+=item *
+
 The values of attributes with names beginning with C<raw_> are
-redacted.
+redacted, as are NPI, patient-specific invitation codes, and textual results.
 
 =item *
 
@@ -98,8 +103,8 @@ sub _build__default_mappings {
     remap_id => [ qr/id$/i ],
     remap_date => [ qr/_date$/i ],
     remap_datetime => [ qr/_time$/i ],
-    remap_label => [ 'site' ],
-    redact_value => [ qr/^raw_/i ],
+    remap_label => [ 'site', 'facilityid', 'pro_response_text', 'vx_lot_num' ],
+    redact_value => [ qr/^raw_|^trial_invite_code$|^provider_npi$|result_text$|zip9$/i ],
   };
 }
 

@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify::PEDSnet_CDM;
 
-our($VERSION) = '2.00';
+our($VERSION) = '3.00';
 
 use Moo 2;
 
@@ -82,13 +82,14 @@ datetime-shifted.
 
 =item *
 
-The values of attributes with names ending in C<_source_value>, as
-well as C<provider_name> are redacted.
+The values of attributes with names ending in C<_source_value>, as well as
+C<provider_name>, C<plan_name> and C<care_site_name> and precise locations are
+redacted.
 
 =item *
 
-The values of the C<site>, C<zip>, C<address_1>, C<address_2>,
-C<city> and C<county> attributes are remapped as labels.
+The values of the C<site>, C<zip>, C<city> and C<county>, as well as selected
+free-text attributes, are remapped as labels.
 
 =back
 
@@ -103,8 +104,10 @@ sub _build__default_mappings {
     remap_id => [ qr/(?<!_concept)_id$|^npi$|^dea$/i ],
     remap_date => [ qr/_date$/i ],
     remap_datetime => [ qr/^time_of_birth$|_time$|_datetime$/i ],
-    remap_label => [ qw/ site zip address_1 address_2 city county / ],
-    redact_value => [ qr/_source_value$|^provider_name$|^care_site_name$|^sig$|^plan_name$/i ],
+    remap_label => [ qw/ site zip city county stop_reason value_as_string frequency lot_number
+		         imm_manufacturer imm_lot_num / ],
+    redact_value => [ qr/_source_value$|^provider_name$|^care_site_name$|^sig$|^plan_name$/,
+		      qr/^census_block|^latitude|^longitude|^address|^npi$|^dea$|^production_id$/i ],
   };
 }
 
