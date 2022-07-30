@@ -101,7 +101,7 @@ sub _build__default_mappings {
 
   return {
     %$start,
-    remap_id => [ qr/(?<!_concept)_id$|^npi$|^dea$/i ],
+    remap_id => [ qr/(?<!_concept)_id$/i ],
     remap_date => [ qr/_date$/i ],
     remap_datetime => [ qr/^time_of_birth$|_time$|_datetime$/i ],
     remap_label => [ qw/ site zip city county stop_reason value_as_string frequency lot_number
