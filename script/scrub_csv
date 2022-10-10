@@ -550,16 +550,18 @@ sub run {
       }
       warn "Converting $f to $scrubbed\n" if $app->verbose;
       $done++ if $app->scrub_csv($f, $scrubbed);
+      $app->_scrubber->save_maps( $app->save_maps_to )
+	if $app->save_maps_to;
     }
   }
   else {
     $done++ if $app->scrub_csv(\*STDIN,
 			       $outfh ||
 			       ( $tag ? $tag : \*STDOUT));
+    $app->_scrubber->save_maps( $app->save_maps_to )
+      if $app->save_maps_to;
   }
 
-  $app->_scrubber->save_maps( $app->save_maps_to )
-    if $app->save_maps_to;
 
   $done;
 }
