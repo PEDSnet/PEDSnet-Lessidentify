@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify::App::scrub_csv;
 
-our($VERSION) = '1.40';
+our($VERSION) = '1.50';
 
 =head1 NAME
 
@@ -270,15 +270,18 @@ option 'output_tag' =>
 
 =item save_maps_to=I<path>
 
-After scrubbing of data is completed, save crosswalks to I<path>, so
-it can be used in the future on additional input.  Crosswalk data is
-saved as JSON, in the hope that it is both a relatively human-readable
-and widely machine-readable format.  That said, the structure reflects
-the internal structure of the scrubber object, which is not considered
-part of the API.  Therefore, the only guarantee is that the crosswalks
-will be loadable by a scrubber of the same class that wrote them;
-there is no promise of compatibility over time or even between
-subclasses of L<PEDSnet::Lessidentify>.
+After scrubbing of data is completed, save crosswalks to I<path>, so it can be
+used in the future on additional input.  If multiple files are scrubbed, state
+is saved after each file is completed.  An attempt is also made to save state if
+the process is interrupted, but the result is dependent on what caused the
+interruption in the first place.
+
+Crosswalk data is saved as JSON, in the hope that it is both a relatively
+human-readable and widely machine-readable format.  That said, the structure
+reflects the internal structure of the scrubber object, which is not considered
+part of the API.  Therefore, the only guarantee is that the crosswalks will be
+loadable by a scrubber of the same class that wrote them; there is no promise of
+compatibility over time or even between subclasses of L<PEDSnet::Lessidentify>.
 
 =cut
 

@@ -2,6 +2,10 @@
   Bugfixes:
     * Redact additional text columns in PEDSnet CDM
 
+  1.80
+  New Features:
+    * Write maps more frequently to improve crash recovery
+  
 {{$NEXT}}
   New Features:
     * 
