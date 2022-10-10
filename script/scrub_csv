@@ -522,7 +522,7 @@ sub run {
       }
     }
   }
-  
+
   if ($app->version) {
     no strict 'refs';
     my $dummy = $app->_scrubber;
@@ -535,6 +535,22 @@ sub run {
     exit 0;
   }
 
+  if ($app->save_maps_to) {
+    # N.B. Trying to do substantial I/O in a signal handler is a very dangerous
+    # and unreliable process.  But we make an attempt to preserve state if the
+    # user interrupts execution or there's an internal error. Other system
+    # signals are presumed to be too emergent.
+    my $mapout =
+      sub {
+	print STDERR "Signal encountered; attempting to write maps";
+	$app->_scrubber->save_maps( $app->save_maps_to );
+	print STDERR "Done.";
+      };
+    $SIG{INT} = sub { my @saved_args = @_; $mapout->(@saved_args); die @saved_args; };
+    $SIG{HUP} = $mapout;
+    $SIG{__DIE__} = sub { my @saved_args = @_; $mapout->(@saved_args); die @saved_args; };
+  }
+  
   if (@$files) {
     while (@$files) {
       my $f = shift @$files;
