@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify::PCORnet_CDM;
 
-our($VERSION) = '2.00';
+our($VERSION) = '3.00';
 
 use Moo 2;
 
@@ -104,6 +104,11 @@ sub _build__default_mappings {
     remap_date => [ qr/_date$/i ],
     remap_datetime => [ qr/_time$/i ],
     remap_label => [ 'site', 'facilityid', 'pro_response_text', 'vx_lot_num' ],
+	  alias_attributes => { providerid => [ 'medadmin_providerid',
+						'obsgen_providerid',
+						'obsclin_providerid',
+						'rx_providerid',
+						'vx_providerid' ] },
     redact_value => [ qr/^raw_|^trial_invite_code$|^provider_npi$|result_text$|zip9$/i ],
   };
 }
