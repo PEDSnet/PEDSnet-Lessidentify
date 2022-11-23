@@ -2,11 +2,11 @@
   Bugfixes:
     * Redact additional text columns in PEDSnet CDM
 
-  1.80
+1.80
   New Features:
     * Write maps more frequently to improve crash recovery
   
- 1.90
+1.90
   New Features:
     * PCORnet CDM rules aleas various provider ID fields
 
