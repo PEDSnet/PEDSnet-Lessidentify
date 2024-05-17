@@ -6,7 +6,7 @@ use warnings;
 
 package PEDSnet::Lessidentify;
 
-our($VERSION) = '1.90';
+our($VERSION) = '1.91';
 
 use Carp qw(carp croak);
 
@@ -922,13 +922,18 @@ contents of I<$record> itself are unchanged.
 sub scrub_record {
   my($self, $rec, $opts) = @_;
   $opts //= {};
-  my $preserve = $self->preserve_attributes;
-  my $redact = $self->redact_attributes;
-  my $force = $self->force_mappings // {};
   my $def_map = $self->_default_mappings;
-  my $aliases = $self->alias_attributes // {};
+  my $preserve = $self->preserve_attributes // $def_map->{preserve_attributes};
+  my $redact = $self->redact_attributes // $def_map->{redact_attributes};
+  my $force = $self->force_mappings // $def_map->{force_mappings} // {};
+  my $aliases = $self->alias_attributes // $def_map->{alias_attributes} // {};
   my %new = %$rec;
 
+  foreach my $k ('preserve_attributes', 'redact_attributes',
+		 'force_mappings', 'alias_attributes') { 
+    delete $def_map->{$k}
+  }
+  
   foreach my $k (keys %new) {
     $new{$k} = $self->redact_value($rec, $k), next if $k ~~ $redact;
     next if $k ~~ $preserve or !defined($rec->{$k}) or !length($rec->{$k});

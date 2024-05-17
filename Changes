@@ -10,7 +10,12 @@
   New Features:
     * PCORnet CDM rules aleas various provider ID fields
 
-  {{$NEXT}}
+1.91
+ Bugfixes:
+    * Account for special directives in _default_mappings
+
+
+{{$NEXT}}
   New Features:
     * 
   Incompatible changes:
